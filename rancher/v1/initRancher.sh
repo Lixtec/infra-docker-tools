@@ -6,6 +6,7 @@ DB_USER=rancher
 DB_PASSWORD=R1nch3r.
 DB_ROOT_PWD=R0Ot47TR.98?ko
 DOMAIN_URI=infra.dev.lan
+AUTO_CERT=true
 
 if [ -n "$1" ]; then 
   VERSION_RANCHER=$1;
@@ -29,6 +30,15 @@ fi
 
 if [ -n "$6" ]; then
   DOMAIN_URI=$6;
+fi
+
+if [ -n "$7" ]; then
+  AUTO_CERT=$7;
+fi
+
+#Installation de let'sencrypt et generation des certificats
+if [ $AUTO_CERT == true ]; then
+ ../../letsencrypt/installLetsencrypt.sh "contact@lixtec.fr" $DOMAIN_URI
 fi
 
 #Purge des images et des conteneurs presents. Sauvegarde des volumes.
@@ -83,7 +93,7 @@ echo '   mode http' >> haproxy.cfg &&\
 echo "   server rancher-app-$VERSION_RANCHER rancher-app-$VERSION_RANCHER:8080" >> haproxy.cfg &&\
 echo '   http-request add-header X-Forwarded-Proto https if { ssl_fc }' >> haproxy.cfg &&\
 echo '   http-request set-header X-Forwarded-Port %[dst_port]' >> haproxy.cfg &&\
-cp  haproxy.cfg /var/docker/volume/rancher-proxy &&\
-cp ./haproxy/* /var/docker/volume/rancher-proxy
+cp  haproxy.cfg /var/docker/volume/rancher-proxy
+cp ./haproxy/* /var/docker/volume/rancher-proxy || echo ''
 
 docker run --name rancher-proxy-$VERSION_RANCHER --restart=always -d --link rancher-app-$VERSION_RANCHER -v /var/docker/volume/rancher-proxy:/usr/local/etc/haproxy:ro -p80:80 -p443:443 haproxy:1.7
