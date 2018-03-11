@@ -1,11 +1,11 @@
 #! /bin/bash
 set -e 
-VERSION_RANCHER=v1.6.14 
+VERSION_RANCHER=v1.6.14
 UPDATE=false
 DB_USER=rancher
-DB_PASSWORD=R1nch3r.122001
-DB_ROOT_PWD=R0Ot47TR.98?ko.1201
-DOMAIN_URI=admin.infra.lixtec.fr
+DB_PASSWORD=R1nch3r
+DB_ROOT_PWD=R0Ot47TR.98?ko
+DOMAIN_URI=admin.domain.fr
 AUTO_CERT=true
 
 if [ -n "$1" ]; then 
@@ -99,8 +99,8 @@ echo ' frontend http-in' >> haproxy.cfg &&\
 echo '   bind *:443 ssl crt /usr/local/etc/haproxy/certificate.pem' >> haproxy.cfg &&\
 echo '   mode http' >> haproxy.cfg &&\
 echo ' ' >> haproxy.cfg &&\
-echo '     acl 0_host hdr(host) -i $DOMAIN_URI' >> haproxy.cfg &&\
-echo '     acl 0_host hdr(host) -i $DOMAIN_URI:443' >> haproxy.cfg &&\
+echo "     acl 0_host hdr(host) -i $DOMAIN_URI" >> haproxy.cfg &&\
+echo "     acl 0_host hdr(host) -i $DOMAIN_URI:443" >> haproxy.cfg &&\
 echo '   use_backend rancher_server if 0_host' >> haproxy.cfg &&\
 echo ' ' >> haproxy.cfg &&\
 echo ' backend rancher_server' >> haproxy.cfg &&\
