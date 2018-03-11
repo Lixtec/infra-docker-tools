@@ -1,11 +1,11 @@
 #! /bin/bash
 set -e 
-VERSION_RANCHER=v1.6.12 
+VERSION_RANCHER=v1.6.14 
 UPDATE=false
 DB_USER=rancher
-DB_PASSWORD=R1nch3r.
-DB_ROOT_PWD=R0Ot47TR.98?ko
-DOMAIN_URI=infra.dev.lan
+DB_PASSWORD=R1nch3r.122001
+DB_ROOT_PWD=R0Ot47TR.98?ko.1201
+DOMAIN_URI=admin.infra.lixtec.fr
 AUTO_CERT=true
 
 if [ -n "$1" ]; then 
@@ -37,24 +37,39 @@ if [ -n "$7" ]; then
 fi
 
 #Installation de let'sencrypt et generation des certificats
-if [ $AUTO_CERT == true ]; then
- ../../letsencrypt/installLetsencrypt.sh "contact@lixtec.fr" $DOMAIN_URI
+if [ $AUTO_CERT = true ]; then
+  echo "=============================================================\n"
+  echo " Installation de let's encrypt et génération des certificats\n"
+  echo "============================================================="
+  ../../letsencrypt/installLetsencrypt.sh "contact@lixtec.fr" $DOMAIN_URI
+  rm -rf ./haproxy
+  mkdir haproxy
+  cat /etc/letsencrypt/live/$DOMAIN_URI/cert.pem > haproxy/certificate.pem
+  cat /etc/letsencrypt/live/$DOMAIN_URI/privkey.pem >> haproxy/certificate.pem
 fi
 
 #Purge des images et des conteneurs presents. Sauvegarde des volumes.
-if [ $UPDATE == true ]; then
- docker rm -f $(docker ps -a -q);
-# docker rmi -f $(docker images -q);
+if [ $UPDATE = true ]; then
+  echo "================================\n"
+  echo " Purge des conteneurs existants\n"
+  echo "================================"
+  docker rm -f $(docker ps -a -q);
 fi
 
+echo "======================================\n"
+echo " Configuration de RANCHER $VERSION_RANCHER\n"
+echo "======================================"
 #Installation DB
-docker run --name rancher-db-$VERSION_RANCHER --restart=always -d -v /var/docker/volume/rancher-db:/var/lib/mysql -v /var/docker/logs/rancher-db:/var/log/mysql -e MYSQL_USER="$DB_USER" -e MYSQL_PASSWORD="$DB_PWD" -e MYSQL_ROOT_PASSWORD="DB_ROOT_PWD" -e MYSQL_DATABASE="rancher" mysql:5.7 
+docker run --name rancher-db-$VERSION_RANCHER --restart=always -d -v /var/docker/volume/rancher-db:/var/lib/mysql -v /var/docker/logs/rancher-db:/var/log/mysql -e MYSQL_USER="$DB_USER" -e MYSQL_PASSWORD="$DB_PASSWORD" -e MYSQL_ROOT_PASSWORD="$DB_ROOT_PWD" -e MYSQL_DATABASE="rancher" mysql:5.7 
 sleep 30
 
 #Installation APP
-docker run --name rancher-app-$VERSION_RANCHER --restart=always -d --link rancher-db-$VERSION_RANCHER -v /var/docker/logs/rancher-app:/var/lib/cattle/logs -v /etc/ssl:/etc/ssl -e CATTLE_DB_CATTLE_MYSQL_HOST="rancher-db-$VERSION_RANCHER" -e CATTLE_DB_CATTLE_MYSQL_PORT=3306 -e CATTLE_DB_CATTLE_MYSQL_NAME="$DB_USER" -e CATTLE_DB_CATTLE_USERNAME="$DB_USER" -e CATTLE_DB_CATTLE_PASSWORD="$DB_PWD" -p 9080:8080 rancher/server:$VERSION_RANCHER
+docker run --name rancher-app-$VERSION_RANCHER --restart=always -d --link rancher-db-$VERSION_RANCHER -v /var/docker/logs/rancher-app:/var/lib/cattle/logs -v /etc/ssl:/etc/ssl -e CATTLE_DB_CATTLE_MYSQL_HOST="rancher-db-$VERSION_RANCHER" -e CATTLE_DB_CATTLE_MYSQL_PORT=3306 -e CATTLE_DB_CATTLE_MYSQL_NAME="rancher" -e CATTLE_DB_CATTLE_USERNAME="$DB_USER" -e CATTLE_DB_CATTLE_PASSWORD="$DB_PASSWORD" -p 9080:8080 rancher/server:$VERSION_RANCHER
 
 
+echo "========================\n"
+echo " Configuration du proxy\n"
+echo "========================"
 #Installation PROXY
 rm -rf /var/docker/volume/rancher-proxy &&\
 mkdir /var/docker/volume/rancher-proxy &&\

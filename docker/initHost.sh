@@ -1,7 +1,7 @@
 #! /bin/bash
 
 set -e
-VERSION_DOCKER=17.12.0~ce-0~ubuntu
+VERSION_DOCKER=17.09.1~ce-0~ubuntu
 if [ -n "$1" ]; then
 	VERSION_DOCKER=$1
 fi
@@ -20,9 +20,9 @@ echo "========================" &&\
 echo "MISE A JOUR DU SYSTEME" &&\
 echo "========================" &&\
 cp ca/* /usr/local/share/ca-certificates/. &&  update-ca-certificates &&\
-apt-get remove docker-ce &&\
+apt-mark unhold 'docker-ce' && apt-get remove -y docker-ce &&\
 rm -rf /etc/systemd/system/docker.service.d &&\
-apt -y full-upgrade &&  apt-get update
+apt-get update && apt -y full-upgrade
 echo " "
 
 
@@ -31,7 +31,7 @@ echo "INSTALLATION DE DOCKER $VERSION_DOCKER" &&\
 echo "========================" &&\
 apt-get -y install apt-transport-https &&\
 apt-get -y install docker-ce=$VERSION_DOCKER &&\
-apt autoremove && apt-mark hold 'docker-ce' &&\
+apt autoremove -y --purge && apt-mark hold 'docker-ce' &&\
 mkdir /etc/systemd/system/docker.service.d &&\
 echo '[Service]' | tee /etc/systemd/system/docker.service.d/docker.conf &&\
 echo 'ExecStart=' | tee -a /etc/systemd/system/docker.service.d/docker.conf &&\
