@@ -87,3 +87,7 @@ cp  haproxy.cfg /var/docker/volume/rancher-proxy &&\
 cp ./haproxy/* /var/docker/volume/rancher-proxy
 
 docker run --name rancher-proxy-$VERSION_RANCHER --restart=always -d --link rancher-app-$VERSION_RANCHER -v /var/docker/volume/rancher-proxy:/usr/local/etc/haproxy:ro -p80:80 -p443:443 haproxy:1.7
+sleep 20
+
+#Installation NFS
+docker run --name rancher-nfs-server-$VERSION_RANCHER --restart=always -d --privileged -v /var/docker/volume/rancher-nfs:/share -v /var/docker/volume/rancher-nfs/exports:/etc/exports -eSHARED_DIRECTORY=/share -p 111:111/tcp -p 111:111/udp -p 2049:2049/tcp -p 2049:2049/udp lixtec/nfs-server:latest
