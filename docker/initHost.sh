@@ -19,7 +19,8 @@ echo " "
 echo "========================" &&\
 echo "MISE A JOUR DU SYSTEME" &&\
 echo "========================" &&\
-cp ca/* /usr/local/share/ca-certificates/. &&  update-ca-certificates &&\
+cp ca/* /usr/local/share/ca-certificates/.  || echo ''
+update-ca-certificates
 apt-mark unhold 'docker-ce' && apt-get remove -y docker-ce &&\
 rm -rf /etc/systemd/system/docker.service.d &&\
 apt-get update && apt -y full-upgrade
@@ -30,7 +31,7 @@ echo "========================" &&\
 echo "INSTALLATION DE DOCKER $VERSION_DOCKER" &&\
 echo "========================" &&\
 apt-get -y install apt-transport-https &&\
-apt-get -y install docker-ce=$VERSION_DOCKER &&\
+apt-get -y --allow-downgrades install docker-ce=$VERSION_DOCKER &&\
 apt autoremove -y --purge && apt-mark hold 'docker-ce' &&\
 mkdir /etc/systemd/system/docker.service.d &&\
 echo '[Service]' | tee /etc/systemd/system/docker.service.d/docker.conf &&\
