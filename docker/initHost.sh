@@ -19,9 +19,9 @@ echo " "
 echo "========================" &&\
 echo "MISE A JOUR DU SYSTEME" &&\
 echo "========================" &&\
-cp ca/* /usr/local/share/ca-certificates/.  || echo ''
+cp ../ca/* /usr/local/share/ca-certificates/.  || echo ''
 update-ca-certificates
-apt-mark unhold 'docker-ce' && apt-get remove -y docker-ce &&\
+apt-mark unhold 'docker-ce' || echo '' && apt-get remove -y docker-ce || echo '' &&\
 rm -rf /etc/systemd/system/docker.service.d &&\
 apt-get update && apt -y full-upgrade
 echo " "
