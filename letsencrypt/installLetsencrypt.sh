@@ -39,7 +39,7 @@ mv certbot-auto /usr/local/bin
 # Install the dependencies.
 certbot-auto --noninteractive --os-packages-only
 
-certbot-auto certonly --agree-tos --non-interactive --text --rsa-key-size 4096 --email $MAIL --standalone --domains $DOMAINS_URI
+certbot-auto certonly --agree-tos --non-interactive --expand --text --rsa-key-size 4096 --email $MAIL --standalone --domains $DOMAINS_URI
 
 #Prepare cron renewall
 CRON_SCRIPT="/etc/cron.daily/certbot-renew"
