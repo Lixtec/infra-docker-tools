@@ -25,6 +25,10 @@ if [ -n "$2" ]; then
   DOMAINS_URI=$2;
 fi
 
+if [ -n "$3" ]; then
+  CERT_PATH=$3;
+fi
+
 echo "START INSTALL LET'S ENCRYPT by $MAIL for $DOMAINS_URI"
 
 # May or may not have HOME set, and this drops stuff into ~/.local.
@@ -32,19 +36,24 @@ export HOME="/root"
 export PATH="${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # No package install yet.
-wget https://dl.eff.org/certbot-auto
-chmod a+x certbot-auto
-mv certbot-auto /usr/local/bin
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot-auto
 
 # Install the dependencies.
-certbot-auto --noninteractive --os-packages-only
+certbot --noninteractive --os-packages-only
 
-certbot-auto certonly --agree-tos --non-interactive --expand --text --rsa-key-size 4096 --email $MAIL --standalone --domains $DOMAINS_URI
+certbot certonly --agree-tos --non-interactive --expand --text --rsa-key-size 4096 --email $MAIL --standalone --domains $DOMAINS_URI
 
 #Prepare cron renewall
 CRON_SCRIPT="/etc/cron.daily/certbot-renew"
 cat>"${CRON_SCRIPT}"<<EOF
 #! /BIN/BASH
-certbot-auto --no-self-upgrade certonly
+certbot --no-self-upgrade certonly
 EOF
 chmod a+x "${CRON_SCRIPT}"
+
+# copie des certificats
+rm -rf /var/docker/certs/$CERT_PATH && mkdir -p /var/docker/certs/$CERT_PATH
+cp -rf /etc/letsencrypt/archive/$CERT_PATH/* /var/docker/certs/$CERT_PATH
+
