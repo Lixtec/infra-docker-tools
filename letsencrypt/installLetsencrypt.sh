@@ -1,10 +1,8 @@
 #! /bin/bash
 #
-# This sets up Let's Encrypt SSL certificates and automatic renewal
-# using certbot: https://certbot.eff.org
+# This sets up Let's Encrypt SSL certificates
 #
 # - Run this script as root.
-# - A webserver must be up and running.
 #
 # Certificate files are placed into subdirectories under
 # /etc/letsencrypt/live/*.
@@ -12,7 +10,7 @@
 # Configuration must then be updated for the systems using the
 # certificates.
 #
-# The certbot-auto program logs to /var/log/letsencrypt.
+# The certbot program logs to /var/log/letsencrypt.
 #
 set-e
 MAIL="contact@lixtec.fr" 
@@ -36,22 +34,12 @@ export HOME="/root"
 export PATH="${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # No package install yet.
-sudo snap install core; sudo snap refresh core
-sudo snap install --classic certbot
-sudo ln -s /snap/bin/certbot /usr/bin/certbot-auto
+apt install python3-pip
+pip3 install -U certbot
+pip3 install -U certbot-dns-ovh
 
 # Install the dependencies.
-certbot --noninteractive --os-packages-only
-
-certbot certonly --agree-tos --non-interactive --expand --text --rsa-key-size 4096 --email $MAIL --standalone --domains $DOMAINS_URI
-
-#Prepare cron renewall
-CRON_SCRIPT="/etc/cron.daily/certbot-renew"
-cat>"${CRON_SCRIPT}"<<EOF
-#! /BIN/BASH
-certbot --no-self-upgrade certonly
-EOF
-chmod a+x "${CRON_SCRIPT}"
+/usr/local/bin/certbot certonly --dns-ovh --dns-ovh-credentials /etc/certbot/.ovhapi --agree-tos --non-interactive --expand --text --rsa-key-size 4096 --email $MAIL --domains $DOMAINS_URI
 
 # copie des certificats
 rm -rf /var/docker/certs/$CERT_PATH && mkdir -p /var/docker/certs/$CERT_PATH
