@@ -27,7 +27,7 @@ if [ -n "$3" ]; then
   CERT_PATH=$3;
 fi
 
-echo "START INSTALL LET'S ENCRYPT by $MAIL for $DOMAINS_URI"
+echo "STARTING INSTALL LET'S ENCRYPT by $MAIL for $DOMAINS_URI"
 
 # May or may not have HOME set, and this drops stuff into ~/.local.
 export HOME="/root"
